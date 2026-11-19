@@ -1,0 +1,39 @@
+plugins { id 'com.android.application' }
+
+def gameRoot = rootProject.projectDir.parentFile
+
+ext.gbaGame = [
+    applicationId: 'org.erpiopio.legacygoku1.thor',
+    versionCode: 1,
+    versionName: '0.1.0-algp-dev',
+    title: 'Legacy of Goku I Thor',
+    romLabel: 'Dragon Ball Z: The Legacy of Goku (Europa ALGP)',
+    romSha1: ['c2691355247b03083578071d4d4a017f5599be20'],
+    romSize: 8388608,
+    romFile: 'legacy1-europe.gba',
+    variant: 'legacy1-europe',
+    gameToml: file('src/main/assets-source/game.toml'),
+    gameRoot: gameRoot,
+    engineRoot: new File(gameRoot, 'gbarecomp'),
+    biosRequired: true,
+    orientation: 'landscape',
+    payloadVersion: 'legacy1-thor-algp-1',
+    setupNote: 'Importa la ROM europea ALGP y la BIOS GBA.',
+    nativeJobs: 1,
+    debugAbis: ['arm64-v8a'],
+    releaseAbis: ['arm64-v8a'],
+    cmakeArguments: [
+        '-DGBAGAME_RECOMP_UI=OFF',
+        '-DGBARECOMP_RUNTIME_UI_ROOT=',
+        '-DGBARECOMP_SELFHEAL_RECOMPILE_DEFAULT=OFF'
+    ],
+]
+
+apply from: new File(gameRoot, 'gbarecomp/platform/android/gbarecomp-app.gradle')
+
+
+// legacy1-dual-v3-fixed sources
+// Keep the engine's SDL Java and resources; append only this game's sources.
+android.sourceSets.main.manifest.srcFile file('src/main/AndroidManifest.xml')
+android.sourceSets.main.java.srcDir file('src/main/java')
+android.sourceSets.main.assets.srcDir file('src/main/assets')

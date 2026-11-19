@@ -1,3 +1,77 @@
+# Dragon Ball Z: The Legacy of Goku — Android
+
+<!-- LEGACY1_THOR_ANDROID_README -->
+
+Adaptación de **Dragon Ball Z: The Legacy of Goku** para
+**AYN Thor Max**, mediante recompilación nativa de Game Boy Advance.
+
+Basado en el proyecto original
+[DragonBallZLegacyOfGokuRecomp](https://github.com/mstan/DragonBallZLegacyOfGokuRecomp)
+de **mstan**.
+
+## Características
+
+- Aplicación nativa para Android.
+- Compatible con la doble pantalla de AYN Thor Max.
+- Pantalla superior panorámica de 1920 × 1080.
+- Pantalla inferior de 1240 × 1080 con interfaz táctil.
+- Secciones de misiones, inventario, ataques y mapa.
+- Mapa interactivo con seguimiento de Goku y zoom.
+- Soporte de los cinco idiomas de la ROM europea.
+- Compatibilidad con controles físicos.
+- Integración de RetroAchievements, juego oficial ID 758.
+- Notificaciones de logros en la pantalla superior.
+
+## Capturas
+
+### Juego panorámico
+
+![Legacy of Goku panorámico](docs/screenshots/widescreen.png)
+
+### Pantalla inferior
+
+| Menú principal | Misiones |
+|---|---|
+| ![Menú](docs/screenshots/menu.png) | ![Misiones](docs/screenshots/misiones.png) |
+
+| Inventario | Ataques |
+|---|---|
+| ![Inventario](docs/screenshots/inventario.png) | ![Ataques](docs/screenshots/ataques.png) |
+
+| Mapa | Pantalla de carga |
+|---|---|
+| ![Mapa](docs/screenshots/mapa.png) | ![Carga](docs/screenshots/cargando.png) |
+
+## Instalación Android
+
+La APK se distribuirá mediante **GitHub Releases**.
+
+Al iniciar la aplicación, el usuario debe proporcionar sus propias
+copias legalmente obtenidas de la ROM europea compatible y la BIOS GBA.
+
+**No se incluyen ROM, BIOS ni archivos de partidas.**
+
+## RetroAchievements
+
+El juego se identifica oficialmente como
+[Dragon Ball Z: The Legacy of Goku](https://retroachievements.org/game/758).
+
+La integración permite iniciar sesión, identificar el juego y
+procesar logros. Softcore está habilitado; la aceptación de
+desbloqueos debe verificarse con un logro real. Hardcore no
+está aprobado para este cliente.
+
+## Créditos
+
+- Recompilación original: **mstan**.
+- Framework: **gbarecomp**.
+- Sistema de logros: **RetroAchievements / rcheevos**.
+- Adaptación Android y doble pantalla: proyecto Legacy I Thor.
+
+---
+
+## Documentación del proyecto original
+
 # Dragon Ball Z: The Legacy of Goku Recomp
 
 > **Experimental preview.** This recompilation is a byproduct of developing

@@ -16,6 +16,14 @@ set(GBARECOMP_RUNTIME_UI_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/recomp-ui"
     CACHE PATH "recomp-ui root used by the live GBA runtime adapter")
 set(RECOMP_UI_ROOT "${GBARECOMP_RUNTIME_UI_ROOT}"
     CACHE PATH "Path to the shared recomp-ui checkout")
+
+# Android utiliza su propia interfaz, sin ImGui de escritorio.
+if(ANDROID)
+    set(GBARECOMP_RUNTIME_UI_ROOT "" CACHE PATH
+        "Runtime UI root" FORCE)
+    set(RECOMP_UI_ROOT "" CACHE PATH
+        "recomp-ui root" FORCE)
+endif()
 set(GBARECOMP_ENABLE_MODS ON CACHE BOOL
     "Enable the built-in Legacy of Goku mod catalog" FORCE)
 
@@ -29,8 +37,19 @@ file(GLOB GAME_GENERATED_SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/generated/*.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/generated/*.cpp")
 
-add_executable(DragonBallZLegacyOfGokuRecomp
+if(ANDROID)
+    set(LEGACY1_TARGET main)
+    add_library(${LEGACY1_TARGET} SHARED)
+    target_link_libraries(${LEGACY1_TARGET} PRIVATE SDL2::SDL2 log android)
+    target_link_options(${LEGACY1_TARGET} PRIVATE "-Wl,--no-undefined")
+else()
+    set(LEGACY1_TARGET DragonBallZLegacyOfGokuRecomp)
+    add_executable(${LEGACY1_TARGET})
+endif()
+
+target_sources(${LEGACY1_TARGET} PRIVATE
     src/main.cpp
+    src/legacy1_lower_state.cpp
     src/legacy_extended_view.cpp
     src/mods/legacy_adaptive_view_plugin.cpp
     ${GAME_GENERATED_SOURCES})
@@ -43,14 +62,14 @@ if(GAME_RECOMPILED_SOURCES)
         COMPILE_OPTIONS "-O1;-g0")
 endif()
 
-target_include_directories(DragonBallZLegacyOfGokuRecomp PRIVATE
+target_include_directories(${LEGACY1_TARGET} PRIVATE
     "${GBARECOMP_ROOT}/src/armv4t"
     "${GBARECOMP_ROOT}/src/gba"
     "${GBARECOMP_ROOT}/src/runtime"
     "${GBARECOMP_ROOT}/src/debug"
     src)
 
-target_link_libraries(DragonBallZLegacyOfGokuRecomp PRIVATE
+target_link_libraries(${LEGACY1_TARGET} PRIVATE
     "-Wl,--start-group"
     gbarecomp_runtime
     gbarecomp_debug
@@ -58,10 +77,49 @@ target_link_libraries(DragonBallZLegacyOfGokuRecomp PRIVATE
     gbarecomp_armv4t
     "-Wl,--end-group")
 
-target_compile_definitions(DragonBallZLegacyOfGokuRecomp PRIVATE
+# LEGACY1_RETROACHIEVEMENTS_CMAKE_V1
+# Copia privada del cliente oficial. Solo Android.
+if(ANDROID)
+    set(LEGACY1_RA_ROOT
+        "${CMAKE_CURRENT_SOURCE_DIR}/third_party/rcheevos")
+
+    file(GLOB LEGACY1_RA_API CONFIGURE_DEPENDS
+        "${LEGACY1_RA_ROOT}/src/rapi/*.c")
+    file(GLOB LEGACY1_RA_RUNTIME CONFIGURE_DEPENDS
+        "${LEGACY1_RA_ROOT}/src/rcheevos/*.c")
+    file(GLOB LEGACY1_RA_HASH CONFIGURE_DEPENDS
+        "${LEGACY1_RA_ROOT}/src/rhash/*.c")
+
+    add_library(legacy1_rcheevos STATIC
+        "${LEGACY1_RA_ROOT}/src/rc_client.c"
+        "${LEGACY1_RA_ROOT}/src/rc_client_raintegration.c"
+        "${LEGACY1_RA_ROOT}/src/rc_compat.c"
+        "${LEGACY1_RA_ROOT}/src/rc_util.c"
+        "${LEGACY1_RA_ROOT}/src/rc_version.c"
+        ${LEGACY1_RA_API}
+        ${LEGACY1_RA_RUNTIME}
+        ${LEGACY1_RA_HASH})
+
+    set_target_properties(legacy1_rcheevos PROPERTIES
+        POSITION_INDEPENDENT_CODE ON)
+
+    target_include_directories(legacy1_rcheevos PUBLIC
+        "${LEGACY1_RA_ROOT}/include")
+
+    target_compile_definitions(legacy1_rcheevos PRIVATE
+        RC_CLIENT_SUPPORTS_HASH)
+
+    target_sources(${LEGACY1_TARGET}
+        PRIVATE src/legacy1_ra_memory.cpp)
+    target_link_libraries(${LEGACY1_TARGET}
+        PRIVATE legacy1_rcheevos)
+endif()
+
+
+target_compile_definitions(${LEGACY1_TARGET} PRIVATE
     GBARECOMP_DEFAULT_DEBUG_PORT=19887
     GBARECOMP_WINDOW_TITLE="DragonBallZLegacyOfGokuRecomp"
-    GBARECOMP_DEFAULT_GAME_CONFIG="game.toml")
+    GBARECOMP_DEFAULT_GAME_CONFIG="game_europe.toml")
 
 option(GBAGAME_RECOMP_UI "Build the recomp-ui pre-boot launcher" ON)
 if(GBAGAME_RECOMP_UI)
@@ -81,7 +139,7 @@ if(GBAGAME_RECOMP_UI)
     if(WIN32)
         target_link_libraries(game_launcher_ui PUBLIC opengl32)
     endif()
-    target_link_libraries(DragonBallZLegacyOfGokuRecomp PRIVATE game_launcher_ui)
+    target_link_libraries(${LEGACY1_TARGET} PRIVATE game_launcher_ui)
     set_property(SOURCE src/main.cpp APPEND PROPERTY
         COMPILE_DEFINITIONS GBAGAME_RECOMP_UI)
 endif()
@@ -90,12 +148,12 @@ set(LEGACY_PRELOADED_MODS "${CMAKE_CURRENT_SOURCE_DIR}/mods/preloaded")
 if(EXISTS "${LEGACY_PRELOADED_MODS}/packages")
     file(GLOB_RECURSE LEGACY_MOD_MANIFESTS CONFIGURE_DEPENDS
         "${LEGACY_PRELOADED_MODS}/packages/*.toml")
-    set_property(TARGET DragonBallZLegacyOfGokuRecomp APPEND PROPERTY
+    set_property(TARGET ${LEGACY1_TARGET} APPEND PROPERTY
         LINK_DEPENDS ${LEGACY_MOD_MANIFESTS})
-    add_custom_command(TARGET DragonBallZLegacyOfGokuRecomp POST_BUILD
+    add_custom_command(TARGET ${LEGACY1_TARGET} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
             "${LEGACY_PRELOADED_MODS}"
-            "$<TARGET_FILE_DIR:DragonBallZLegacyOfGokuRecomp>/mods"
+            "$<TARGET_FILE_DIR:${LEGACY1_TARGET}>/mods"
         COMMENT "Preloading the Legacy of Goku mod catalog")
 endif()
 

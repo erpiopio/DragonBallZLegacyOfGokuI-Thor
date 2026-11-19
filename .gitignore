@@ -66,3 +66,36 @@ gameplay-selfheal*.json
 Thumbs.db
 __pycache__/
 *.pyc
+
+# Capturas seleccionadas para GitHub
+!docs/screenshots/*.png
+
+# Android: compilaciones y configuración local
+/android/.gradle/
+/android/.cxx/
+/android/build/
+/android/app/.cxx/
+/android/app/build/
+/android/local.properties
+/android/**/local.properties
+**/.cxx/
+*.apk
+*.aab
+*.jks
+*.keystore
+*.pem
+*.p12
+*.key
+**/secrets.properties
+
+# Copias temporales y diagnósticos
+*.bak-*
+/.backup-*/
+/diagnostics/
+
+# Las siete capturas aprobadas
+!docs/screenshots/*.png
+
+# Recursos gráficos oficiales del port Android
+!android/app/src/main/res/drawable-nodpi/*.png
+!android/app/src/main/res/mipmap-nodpi/*.png
